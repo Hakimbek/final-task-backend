@@ -15,6 +15,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * Checks user status and existence. If user is active they can go forward. If not they are not allowed.
+   * The same scenario with user existence. If user with this id exists, we allow going forward.
+   * @param id - user id.
+   */
   async validate({ id }: { id: string }) {
     const user = await this.userService.findById(id);
 

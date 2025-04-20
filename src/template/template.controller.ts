@@ -55,8 +55,8 @@ export class TemplateController {
         @Res() res: Response
     ) {
         try {
-            const userId = this.jwtService.decode(authHeader.split(" ")[1]).id;
-            const template = await this.templateService.getTemplateByTemplateAndUserId(
+            const userId = this.jwtService.decode(authHeader.split(" ")[1])?.id;
+            const template = await this.templateService.getTemplateByID(
                 templateId,
                 userId
             );

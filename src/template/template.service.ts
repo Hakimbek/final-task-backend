@@ -34,22 +34,6 @@ export class TemplateService {
     }
 
     /**
-     * Gets template by template id.
-     * @param templateId - template id.
-     * @returns A template if exists, otherwise throws an error.
-     */
-    getTemplateByID = async (templateId: string) => {
-        const template = await this.templateRepository.findOne({
-            where: { id: templateId },
-            relations: ['user']
-        });
-
-        if (!template) throw new NotFoundException(`Template with id ${templateId} is not found`);
-
-        return template;
-    }
-
-    /**
      * Gets template by template id and user id. Plus, gets questions related to this template.
      * And of user filled out this template before, gets answers of this user to these questions.
      * Otherwise, returns questions with answer field, which is empty string.
@@ -57,7 +41,7 @@ export class TemplateService {
      * @param userId - user id.
      * @returns A template if exists, otherwise throws an error.
      */
-    getTemplateByTemplateAndUserId = async (templateId: string, userId: string) => {
+    getTemplateByID = async (templateId: string, userId?: string) => {
         const template = await this.templateRepository.findOne({
             where: { id: templateId },
             relations: ['user', 'questions']
@@ -66,7 +50,9 @@ export class TemplateService {
         if (!template) throw new NotFoundException(`Template with id ${templateId} is not found`);
 
         let questions = template.questions.map(question => ({ ...question, answer: '' }));
-        const response = await this.responseService.getResponseByUserAndTemplateId(userId, template.id);
+        const response = userId
+            ? await this.responseService.getResponseByUserAndTemplateId(userId, template.id)
+            : null;
 
         if (response) {
             questions = await Promise.all(questions.map(async (question) => {
