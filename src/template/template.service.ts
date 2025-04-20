@@ -39,7 +39,10 @@ export class TemplateService {
      * @returns A template if exists, otherwise throws an error.
      */
     getTemplateByID = async (templateId: string) => {
-        const template = await this.templateRepository.findOne({ where: { id: templateId } });
+        const template = await this.templateRepository.findOne({
+            where: { id: templateId },
+            relations: ['user']
+        });
 
         if (!template) throw new NotFoundException(`Template with id ${templateId} is not found`);
 

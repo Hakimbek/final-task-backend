@@ -21,11 +21,11 @@ export class TemplateGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = request.headers.authorization.split(' ')[1];
-        const template = await this.templateService.getTemplateByID(request.params.id);
-        const user = await this.userService.findById(this.jwtService.decode(token).id);
+        const template = await this.templateService.getTemplateByID(request?.params?.id);
+        const user = await this.userService.findById(this.jwtService.decode(token)?.id);
 
-        if (user.isAdmin) return true;
-        if (user.id !== template.user.id) throw new ForbiddenException('You are not the owner of this template');
+        if (user?.isAdmin) return true;
+        if (user?.id !== template?.user?.id) throw new ForbiddenException('You are not the owner of this template');
 
         return true;
     }

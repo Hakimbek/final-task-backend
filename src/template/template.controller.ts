@@ -29,7 +29,7 @@ export class TemplateController {
     /**
      * Gets templates by search term. If search term is empty, gets all templates.
      * In addition, combine template data with user data who created this template.
-     * @param search - gets search term from query.
+     * @param search - gets search term from query. This path is open.
      * @param res - response.
      */
     @Get()
@@ -43,7 +43,7 @@ export class TemplateController {
     }
 
     /**
-     * Gets template by user id and template id.
+     * Gets template by user id and template id. This path is open.
      * @param templateId - gets template id from params.
      * @param authHeader - gets user id from token.
      * @param res - response.
