@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from "typeorm";
 import { Question } from "./question.entity";
@@ -10,47 +10,60 @@ export class QuestionService {
        private readonly questionRepository: Repository<Question>,
     ) {}
 
-    getQuestionById = async (id : string) => {
-        const question = await this.questionRepository.findOne({ where: { id } });
+    /**
+     * Gets question by question id.
+     * @param questionId - question id.
+     * @returns A question if exists, otherwise throws an error.
+     */
+    getQuestionById = async (questionId : string) => {
+        const question = await this.questionRepository.findOne({
+            where: { id: questionId },
+            relations: ['template'],
+        });
 
-        if (!question) throw new NotFoundException(`Question with id ${id} not found`);
+        if (!question) throw new NotFoundException(`Question with id ${questionId} not found`);
 
         return question;
     }
 
-    getQuestionsByTemplateId = async (templateId: string) => {
-        return await this.questionRepository.find({
-            where: {
-                template: {
-                    id: templateId
-                }
-            }
-        });
-    }
-
+    /**
+     * Edits question by question id.
+     * @param questionId - gets question id from params.
+     * @param title - question title.
+     * @param description - question description.
+     * @param type - question type.
+     * @param isVisible - question visibility.
+     * @returns A message, if question updated successfully, otherwise throws an error.
+     */
     editQuestionById = async (
-        id: string,
+        questionId: string,
         title: string,
         description: string,
         isVisible: boolean,
         type: string,
     ) => {
-        try {
-            const question = await this.getQuestionById(id);
+        const question = await this.getQuestionById(questionId);
 
-            question.title = title;
-            question.description = description;
-            question.type = type;
-            question.isVisible = isVisible;
+        question.title = title;
+        question.description = description;
+        question.type = type;
+        question.isVisible = isVisible;
 
-            await this.questionRepository.save(question);
-            return { message: 'Question is edited successfully' };
-        } catch {
-            throw new InternalServerErrorException('Failed to update user');
-        }
+        await this.questionRepository.save(question);
+
+        return 'Question is edited successfully';
     }
 
-    create = async (
+    /**
+     * Creates question.
+     * @param title - template title.
+     * @param description - template description.
+     * @param type - question type.
+     * @param isVisible - question visibility.
+     * @param templateId - template id what does question belong to.
+     * @returns A newly created question.
+     */
+    createQuestion = async (
         title: string,
         description: string,
         isVisible: boolean,
@@ -70,11 +83,16 @@ export class QuestionService {
         return await this.questionRepository.save(createdQuestion);
     }
 
-    deleteById = async (id: string) => {
-        const result = await this.questionRepository.delete(id);
+    /**
+     * Deletes question by id.
+     * @param questionId - question id.
+     * @returns A message, if question deleted successfully, otherwise throws an error.
+     */
+    deleteQuestionById = async (questionId: string) => {
+        const result = await this.questionRepository.delete(questionId);
 
         if (result.affected === 0) throw new NotFoundException('Question not found or already deleted');
 
-        return { message: `Question with ID ${id} deleted successfully` };
+        return `Question with ID ${questionId} deleted successfully`;
     }
 }

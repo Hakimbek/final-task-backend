@@ -24,7 +24,8 @@ export class Template {
     createdAt: Date;
 
     @ManyToOne(() => User, user => user.templates, {
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        eager: true,
     })
     user: User;
 
