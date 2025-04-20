@@ -1,12 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { JwtService } from "@nestjs/jwt";
 import { QuestionService } from "./question.service";
+import { UserService } from "../user/user.service";
 
 @Injectable()
 export class QuestionGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly questionService: QuestionService
+        private readonly questionService: QuestionService,
+        private readonly userService: UserService,
     ) {}
 
     /**
@@ -20,10 +22,13 @@ export class QuestionGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token = request.headers?.authorization.split(' ')[1];
         const userId = this.jwtService.decode(token)?.id;
+        const user = await this.userService.findById(userId);
         const question = await this.questionService.getQuestionById(request?.params?.id);
 
-        if (question?.template?.user?.isAdmin) return true;
-        if (userId !== question?.template?.user?.id) throw new ForbiddenException('You are not the owner of this question');
+        if (user?.isAdmin) return true;
+        if (user?.id !== question?.template?.user?.id) {
+            throw new ForbiddenException('You are not the owner of this question');
+        }
 
         return true;
     }
