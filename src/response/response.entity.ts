@@ -10,12 +10,14 @@ export class Response {
     id: string;
 
     @ManyToOne(() => User, user => user.responses, {
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        eager: true
     })
     user: User;
 
     @ManyToOne(() => Template, template => template.responses, {
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        eager: true
     })
     template: Template;
 

@@ -3,6 +3,7 @@ import { ResponseService } from "./response.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { ResponseDto } from "./response.dto";
 import { Response } from "express";
+import { ResponseGuard } from "./response.guard";
 
 @Controller('response')
 export class ResponseController {
@@ -10,22 +11,33 @@ export class ResponseController {
         private readonly responseService: ResponseService,
     ) {}
 
-    @Get()
-    @UseGuards(JwtAuthGuard)
-    async getAllResponses(@Res() res: Response) {
-        try {
-            const responses = await this.responseService.getAllResponses();
-            res.status(HttpStatus.OK).send(responses);
-        } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
-        }
-    }
+    // @Get()
+    // @UseGuards(JwtAuthGuard)
+    // async getAllResponses(@Res() res: Response) {
+    //     try {
+    //         const responses = await this.responseService.getResponses();
+    //         res.status(HttpStatus.OK).send(responses);
+    //     } catch (error) {
+    //         res.status(HttpStatus.BAD_REQUEST).send(error);
+    //     }
+    // }
 
-    @Get(':id')
-    @UseGuards(JwtAuthGuard)
-    async getById(@Param('id') id: string, @Res() res: Response) {
+    // @Get(':responseId')
+    // @UseGuards(JwtAuthGuard)
+    // async getById(@Param('responseId') responseId: string, @Res() res: Response) {
+    //     try {
+    //         const response = await this.responseService.getResponseById(responseId);
+    //         res.status(HttpStatus.OK).send(response);
+    //     } catch (error) {
+    //         res.status(HttpStatus.BAD_REQUEST).send(error);
+    //     }
+    // }
+
+    @Get(':templateId')
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async getResponsesByTemplateId(@Param('templateId') templateId: string, @Res() res: Response) {
         try {
-            const response = await this.responseService.getResponseById(id);
+            const response = await this.responseService.getResponsesByTemplateId(templateId);
             res.status(HttpStatus.OK).send(response);
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);
@@ -34,20 +46,20 @@ export class ResponseController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async create(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
+    async createResponse(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
         try {
-            const message = await this.responseService.create(userId, templateId, answers);
+            const message = await this.responseService.createOrUpdateResponse(userId, templateId, answers);
             res.status(HttpStatus.OK).send({ message });
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);
         }
     }
 
-    @Delete(':id')
-    @UseGuards(JwtAuthGuard)
-    async delete(@Param('id') id: string, @Res() res: Response) {
+    @Delete(':responseId')
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async deleteResponseById(@Param('responseId') responseId: string, @Res() res: Response) {
         try {
-            const message = await this.responseService.deleteById(id);
+            const message = await this.responseService.deleteResponseById(responseId);
             res.status(HttpStatus.OK).send({ message });
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);

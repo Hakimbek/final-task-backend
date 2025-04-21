@@ -12,30 +12,67 @@ export class ResponseService {
         private readonly answerService: AnswerService
     ) {}
 
-    getAllResponses = async () => await this.responseRepository.find();
+    /**
+     * Gets all responses.
+     * @returns An array of responses, if responses exist, otherwise empty array.
+     */
+    // getResponses = async () => await this.responseRepository.find();
 
-    getResponseById = async (id: string) => {
-        const response = await this.responseRepository.findOne({ where: { id } });
+    /**
+     * Gets response by response id.
+     * @param responseId - response id.
+     * @returns A response, if response exists, otherwise throws an error.
+     */
+    getResponseById = async (responseId: string) => {
+        const response = await this.responseRepository.findOne({
+            where: { id: responseId },
+            relations: ['template']
+        });
 
-        if (!response) throw new NotFoundException(`Response with id ${id} not found`);
+        if (!response) throw new NotFoundException(`Response with id ${responseId} not found`);
 
         return response;
     }
 
-    getResponseByUserAndTemplateId = async (userId: string, templateId: string) => {
-        return await this.responseRepository.findOne({
+    /**
+     * Gets responses by template id.
+     * @param templateId - template id.
+     * @returns An array of responses, if responses exist, otherwise empty array.
+     */
+    getResponsesByTemplateId = async (templateId: string) => {
+        return await this.responseRepository.find({
             where: {
-                user: {
-                    id: userId
-                },
-                template: {
-                    id: templateId
-                }
+                template: { id: templateId }
             }
         });
     }
 
-    create = async  (
+    /**
+     * Gets response by user and template id.
+     * @param userId - user id.
+     * @param templateId - template id.
+     * @returns A response, if response exists, otherwise null.
+     */
+    getResponseByUserAndTemplateId = async (userId: string, templateId: string) => {
+        return await this.responseRepository.findOne({
+            where: {
+                user: { id: userId },
+                template: { id: templateId }
+            }
+        });
+    }
+
+    /**
+     * Creates or updates response. If response is not existed, a new response is created by user and template id.
+     * Then, new answers are created using newly created response id. If response exists,
+     * we get response using user and template id. Then, we try to get answers using response id.
+     * If answer exists, it is updated. If not, new answer is created.
+     * @param userId - user id.
+     * @param templateId - template id.
+     * @param answers - the array of question id and answer.
+     * @returns A message, if response deleted successfully, otherwise throws an error.
+     */
+    createOrUpdateResponse = async  (
         userId: string,
         templateId: string,
         answers: { questionId: string; answer: string }[]
@@ -44,7 +81,10 @@ export class ResponseService {
 
         if (response) {
             await Promise.all(answers.map(async ({ questionId, answer }) => {
-                const isAnswerExists = await this.answerService.getAnswerByResponseAndQuestionId(response.id, questionId);
+                const isAnswerExists = await this.answerService.getAnswerByResponseAndQuestionId(
+                    response.id,
+                    questionId
+                );
 
                 isAnswerExists
                     ? await this.answerService.updateAnswerById(response.id, questionId, answer)
@@ -52,12 +92,8 @@ export class ResponseService {
             }))
         } else {
             const createdResponse = this.responseRepository.create({
-                user: {
-                    id: userId
-                },
-                template: {
-                    id: templateId
-                }
+                user: { id: userId },
+                template: { id: templateId }
             });
             const response = await this.responseRepository.save(createdResponse);
             const createAnswers = answers.map(({ questionId, answer }) => {
@@ -66,14 +102,19 @@ export class ResponseService {
             await Promise.all(createAnswers);
         }
 
-        return `Response created successfully`;
+        return 'Response created successfully';
     }
 
-    deleteById = async (id: string) => {
-        const result = await this.responseRepository.delete(id);
+    /**
+     * Deletes response by id.
+     * @param responseId - response id.
+     * @returns A message, if response deleted successfully, otherwise throws an error.
+     */
+    deleteResponseById = async (responseId: string) => {
+        const result = await this.responseRepository.delete(responseId);
 
         if (result.affected === 0) throw new NotFoundException('Response not found or already deleted');
 
-        return `Response with ID ${id} deleted successfully`;
+        return `Response with ID ${responseId} deleted successfully`;
     }
 }
