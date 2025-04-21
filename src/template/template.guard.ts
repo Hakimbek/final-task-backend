@@ -25,11 +25,8 @@ export class TemplateGuard implements CanActivate {
         const user = await this.userService.findById(userId);
         const template = await this.templateService.getTemplateByID(request?.params?.id);
 
-        if (user?.isAdmin) return true;
-        if (user?.id !== template?.user?.id) {
-            throw new ForbiddenException('You are not the owner of this template');
-        }
+        if (user?.isAdmin || user?.id === template?.user?.id) return true;
 
-        return true;
+        throw new ForbiddenException('You are not the owner of this template');
     }
 }

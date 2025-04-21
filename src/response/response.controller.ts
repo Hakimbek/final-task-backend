@@ -36,6 +36,7 @@ export class ResponseController {
     @Get(':templateId')
     @UseGuards(JwtAuthGuard, ResponseGuard)
     async getResponsesByTemplateId(@Param('templateId') templateId: string, @Res() res: Response) {
+        console.log(templateId);
         try {
             const response = await this.responseService.getResponsesByTemplateId(templateId);
             res.status(HttpStatus.OK).send(response);

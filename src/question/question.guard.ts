@@ -25,11 +25,8 @@ export class QuestionGuard implements CanActivate {
         const user = await this.userService.findById(userId);
         const question = await this.questionService.getQuestionById(request?.params?.id);
 
-        if (user?.isAdmin) return true;
-        if (user?.id !== question?.template?.user?.id) {
-            throw new ForbiddenException('You are not the owner of this question');
-        }
+        if (user?.isAdmin || user?.id === question?.template?.user?.id) return true;
 
-        return true;
+        throw new ForbiddenException('You are not the owner of this question');
     }
 }

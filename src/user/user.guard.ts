@@ -12,12 +12,11 @@ export class UserGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = request.headers.authorization.split(' ')[1];
-        const decoded = this.jwtService.decode(token);
-        const user = await this.userService.findById(request.params.id);
+        const userId = this.jwtService.decode(token)?.id;
+        const user = await this.userService.findById(request?.params?.id);
 
-        if (user.isAdmin) return true;
-        if (decoded.id !== user.id) throw new ForbiddenException('You are not the owner of this user');
+        if (user?.isAdmin || userId === user?.id) return true;
 
-        return true;
+        throw new ForbiddenException('You are not the owner of this user');
     }
 }

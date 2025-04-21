@@ -45,17 +45,16 @@ export class TemplateController {
     /**
      * Gets template by user id and template id. This path is open.
      * @param templateId - gets template id from params.
-     * @param authHeader - gets user id from token.
+     * @param userId - gets user id from query.
      * @param res - response.
      */
     @Get(':templateId')
     async getTemplateById(
         @Param('templateId') templateId: string,
-        @Headers('authorization') authHeader: string,
+        @Query('userId') userId: string,
         @Res() res: Response
     ) {
         try {
-            const userId = this.jwtService.decode(authHeader.split(" ")[1])?.id;
             const template = await this.templateService.getTemplateByID(
                 templateId,
                 userId

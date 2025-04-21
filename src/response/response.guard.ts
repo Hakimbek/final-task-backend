@@ -24,11 +24,8 @@ export class ResponseGuard implements CanActivate {
         const user = await this.userService.findById(userId);
         const response = await this.responseService.getResponseById(request?.params?.id)
 
-        if (user?.isAdmin) return true;
-        if (user?.id !== response?.template?.user?.id) {
-            throw new ForbiddenException('You are not the owner of this template');
-        }
+        if (user?.isAdmin || user?.id === response?.template?.user?.id) return true;
 
-        return true;
+        throw new ForbiddenException('You are not the owner of this template');
     }
 }
