@@ -1,14 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { JwtService } from "@nestjs/jwt";
-import { ResponseService } from "./response.service";
 import { UserService } from "../user/user.service";
+import { TemplateService } from "../template/template.service";
 
 @Injectable()
 export class ResponseGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly responseService: ResponseService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly templateService: TemplateService
     ) {}
 
     /**
@@ -22,9 +22,9 @@ export class ResponseGuard implements CanActivate {
         const token = request.headers?.authorization.split(' ')[1];
         const userId = this.jwtService.decode(token)?.id;
         const user = await this.userService.findById(userId);
-        const response = await this.responseService.getResponseById(request?.params?.id)
+        const template = await this.templateService.getTemplateByID(request?.params?.id);
 
-        if (user?.isAdmin || user?.id === response?.template?.user?.id) return true;
+        if (user?.isAdmin || user?.id === template?.user?.id) return true;
 
         throw new ForbiddenException('You are not the owner of this template');
     }
