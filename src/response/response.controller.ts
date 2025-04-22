@@ -46,7 +46,7 @@ export class ResponseController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async createResponse(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
+    async createOrUpdateResponse(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
         try {
             const message = await this.responseService.createOrUpdateResponse(userId, templateId, answers);
             res.status(HttpStatus.OK).send({ message });

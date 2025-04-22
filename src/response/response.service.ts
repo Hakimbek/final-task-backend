@@ -24,10 +24,7 @@ export class ResponseService {
      * @returns A response, if response exists, otherwise throws an error.
      */
     getResponseById = async (responseId: string) => {
-        const response = await this.responseRepository.findOne({
-            where: { id: responseId },
-            relations: ['template']
-        });
+        const response = await this.responseRepository.findOne({ where: { id: responseId } });
 
         if (!response) throw new NotFoundException(`Response with id ${responseId} not found`);
 
