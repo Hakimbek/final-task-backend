@@ -24,25 +24,21 @@ export class ResponseGuard implements CanActivate {
         const token = request.headers?.authorization.split(' ')[1];
         const userId = this.jwtService.decode(token)?.id;
         const user = await this.userService.findById(userId);
-        const { templateId, responseId } = request?.params;
 
         if (user?.isAdmin) return true;
 
-        if (templateId) {
-            const template = await this.templateService.getTemplateByID(templateId);
+        if (request?.params?.templateId) {
+            const template = await this.templateService.getTemplateByID(request?.params?.templateId);
 
             if (user?.id === template?.user?.id) return true;
-        } else if (responseId) {
-            const response = await this.responseService.getResponseById(responseId);
-
-            if (user?.id === response?.template?.user?.id) return true;
-        } else {
-            const { userId, templateId } = request?.body;
-            const template = await this.templateService.getTemplateByID(templateId);
-
-            if (userId === user?.id || template?.user?.id === userId) return true;
         }
 
-        throw new ForbiddenException('You are not the owner of this template');
+        if (request?.params?.responseId) {
+            const response = await this.responseService.getResponseById(request?.params?.responseId);
+
+            if (user?.id === response?.template?.user?.id) return true;
+        }
+
+        throw new ForbiddenException('Action is not allowed');
     }
 }

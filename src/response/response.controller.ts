@@ -1,14 +1,16 @@
-import { Controller, Get, Param, Delete, UseGuards, Post, Body, Res, HttpStatus } from "@nestjs/common";
+import { Controller, Get, Param, Delete, UseGuards, Post, Body, Res, HttpStatus, Headers } from "@nestjs/common";
 import { ResponseService } from "./response.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { ResponseDto } from "./response.dto";
 import { Response } from "express";
 import { ResponseGuard } from "./response.guard";
+import { JwtService } from "@nestjs/jwt";
 
 @Controller('response')
 export class ResponseController {
     constructor(
         private readonly responseService: ResponseService,
+        private readonly jwtService: JwtService,
     ) {}
 
     // @Get()
@@ -45,10 +47,20 @@ export class ResponseController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, ResponseGuard)
-    async createOrUpdateResponse(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
+    @UseGuards(JwtAuthGuard)
+    async createOrUpdateResponse(
+        @Body() { userId, templateId, answers }: ResponseDto,
+        @Res() res: Response,
+        @Headers('authorization') authHeader: string
+    ) {
         try {
-            const message = await this.responseService.createOrUpdateResponse(userId, templateId, answers);
+            const token = authHeader?.split(' ')[1];
+            const message = await this.responseService.createOrUpdateResponse(
+                userId,
+                templateId,
+                answers,
+                this.jwtService.decode(token)
+                );
             res.status(HttpStatus.OK).send({ message });
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);

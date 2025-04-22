@@ -29,7 +29,7 @@ export class QuestionController {
 
     /**
      * Creates question. Only the owner and admin are allowed.
-     * @param templateId - template id what does question belong to.
+         * @param templateId - template id what does question belong to.
      * @param title - question title.
      * @param description - question description.
      * @param type - question type.

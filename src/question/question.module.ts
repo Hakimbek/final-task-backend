@@ -5,9 +5,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Question } from "./question.entity";
 import { JwtModule } from "@nestjs/jwt";
 import { UserModule } from "../user/user.module";
+import { TemplateModule } from "../template/template.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Question]), JwtModule, UserModule],
+    imports: [TypeOrmModule.forFeature([Question]), JwtModule, UserModule, TemplateModule],
     controllers: [QuestionController],
     providers: [QuestionService],
     exports: [QuestionService]

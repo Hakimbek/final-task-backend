@@ -1,15 +1,20 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException, Inject, forwardRef } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from "typeorm";
 import { Response } from "./response.entity";
 import { AnswerService } from "../answer/answer.service";
+import { UserService } from "../user/user.service";
+import { TemplateService } from "../template/template.service";
 
 @Injectable()
 export class ResponseService {
     constructor(
         @InjectRepository(Response)
         private readonly responseRepository: Repository<Response>,
-        private readonly answerService: AnswerService
+        private readonly answerService: AnswerService,
+        private readonly userService: UserService,
+        @Inject(forwardRef(() => TemplateService))
+        private readonly templateService: TemplateService,
     ) {}
 
     /**
@@ -67,16 +72,24 @@ export class ResponseService {
      * @param userId - user id.
      * @param templateId - template id.
      * @param answers - the array of question id and answer.
+     * @param token - token
      * @returns A message, if response deleted successfully, otherwise throws an error.
      */
     createOrUpdateResponse = async  (
         userId: string,
         templateId: string,
-        answers: { questionId: string; answer: string }[]
+        answers: { questionId: string; answer: string }[],
+        token: { id: string },
     ) => {
+        const authorizedUser = await this.userService.findById(token?.id);
+        const template = await this.templateService.getTemplateByID(templateId);
         const response = await this.getResponseByUserAndTemplateId(userId, templateId);
 
         if (response) {
+            if (!authorizedUser.isAdmin && authorizedUser.id !== template.user.id && response.user.id !== authorizedUser.id) {
+                throw new ForbiddenException('Action is not allowed');
+            }
+
             await Promise.all(answers.map(async ({ questionId, answer }) => {
                 const isAnswerExists = await this.answerService.getAnswerByResponseAndQuestionId(
                     response.id,
@@ -88,6 +101,10 @@ export class ResponseService {
                     : await this.answerService.create(response.id, questionId, answer);
             }))
         } else {
+            if (authorizedUser?.id === template.user.id) {
+                throw new ForbiddenException("Template owner can't fill out their template");
+            }
+
             const createdResponse = this.responseRepository.create({
                 user: { id: userId },
                 template: { id: templateId }
