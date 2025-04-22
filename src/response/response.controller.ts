@@ -45,7 +45,7 @@ export class ResponseController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, ResponseGuard)
     async createOrUpdateResponse(@Body() { userId, templateId, answers }: ResponseDto, @Res() res: Response) {
         try {
             const message = await this.responseService.createOrUpdateResponse(userId, templateId, answers);

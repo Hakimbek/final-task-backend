@@ -26,14 +26,21 @@ export class ResponseGuard implements CanActivate {
         const user = await this.userService.findById(userId);
         const { templateId, responseId } = request?.params;
 
+        if (user?.isAdmin) return true;
+
         if (templateId) {
             const template = await this.templateService.getTemplateByID(templateId);
 
-            if (user?.isAdmin || user?.id === template?.user?.id) return true;
-        } else {
+            if (user?.id === template?.user?.id) return true;
+        } else if (responseId) {
             const response = await this.responseService.getResponseById(responseId);
 
-            if (user?.isAdmin || user?.id === response?.template?.user?.id) return true;
+            if (user?.id === response?.template?.user?.id) return true;
+        } else {
+            const { userId, templateId } = request?.body;
+            const template = await this.templateService.getTemplateByID(templateId);
+
+            if (userId === user?.id || template?.user?.id === userId) return true;
         }
 
         throw new ForbiddenException('You are not the owner of this template');
