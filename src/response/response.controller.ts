@@ -13,28 +13,6 @@ export class ResponseController {
         private readonly jwtService: JwtService,
     ) {}
 
-    // @Get()
-    // @UseGuards(JwtAuthGuard)
-    // async getAllResponses(@Res() res: Response) {
-    //     try {
-    //         const responses = await this.responseService.getResponses();
-    //         res.status(HttpStatus.OK).send(responses);
-    //     } catch (error) {
-    //         res.status(HttpStatus.BAD_REQUEST).send(error);
-    //     }
-    // }
-
-    // @Get(':responseId')
-    // @UseGuards(JwtAuthGuard)
-    // async getById(@Param('responseId') responseId: string, @Res() res: Response) {
-    //     try {
-    //         const response = await this.responseService.getResponseById(responseId);
-    //         res.status(HttpStatus.OK).send(response);
-    //     } catch (error) {
-    //         res.status(HttpStatus.BAD_REQUEST).send(error);
-    //     }
-    // }
-
     @Get('user/:userId')
     @UseGuards(JwtAuthGuard, ResponseGuard)
     async getResponsesByUserId(@Param('userId') userId: string, @Res() res: Response) {

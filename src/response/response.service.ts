@@ -18,12 +18,6 @@ export class ResponseService {
     ) {}
 
     /**
-     * Gets all responses.
-     * @returns An array of responses, if responses exist, otherwise empty array.
-     */
-    // getResponses = async () => await this.responseRepository.find();
-
-    /**
      * Gets response by response id.
      * @param responseId - response id.
      * @returns A response, if response exists, otherwise throws an error.
@@ -99,7 +93,7 @@ export class ResponseService {
         const response = await this.getResponseByUserAndTemplateId(userId, templateId);
 
         if (response) {
-            if (!authorizedUser.isAdmin && authorizedUser.id !== template.user.id && response.user.id !== authorizedUser.id) {
+            if (!authorizedUser.isAdmin && response.user.id !== authorizedUser.id) {
                 throw new ForbiddenException('Action is not allowed');
             }
 
