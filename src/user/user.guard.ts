@@ -13,7 +13,7 @@ export class UserGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token = request.headers.authorization.split(' ')[1];
         const userId = this.jwtService.decode(token)?.id;
-        const user = await this.userService.findById(request?.params?.id);
+        const user = await this.userService.findById(request?.params?.userId);
 
         if (user?.isAdmin || userId === user?.id) return true;
 
