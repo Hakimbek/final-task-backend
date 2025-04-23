@@ -33,10 +33,14 @@ export class ResponseGuard implements CanActivate {
             if (user?.id === template?.user?.id) return true;
         }
 
+        if (request?.params?.userId) {
+            if (user?.id === request?.params?.userId) return true;
+        }
+
         if (request?.params?.responseId) {
             const response = await this.responseService.getResponseById(request?.params?.responseId);
 
-            if (user?.id === response?.template?.user?.id) return true;
+            if (user?.id === response?.template?.user?.id || user?.id === response?.user?.id) return true;
         }
 
         throw new ForbiddenException('Action is not allowed');

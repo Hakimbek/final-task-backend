@@ -50,6 +50,19 @@ export class ResponseService {
     }
 
     /**
+     * Gets responses by user id.
+     * @param userId - user id.
+     * @returns An array of responses, if responses exist, otherwise empty array.
+     */
+    getResponsesByUserId = async (userId: string) => {
+        return await this.responseRepository.find({
+            where: {
+                user: { id: userId }
+            }
+        });
+    }
+
+    /**
      * Gets response by user and template id.
      * @param userId - user id.
      * @param templateId - template id.

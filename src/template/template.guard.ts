@@ -23,7 +23,7 @@ export class TemplateGuard implements CanActivate {
         const token = request.headers?.authorization.split(' ')[1];
         const userId = this.jwtService.decode(token)?.id;
         const user = await this.userService.findById(userId);
-        const template = await this.templateService.getTemplateByID(request?.params?.id);
+        const template = await this.templateService.getTemplateByID(request?.params?.templateId);
 
         if (user?.isAdmin || user?.id === template?.user?.id) return true;
 

@@ -35,7 +35,18 @@ export class ResponseController {
     //     }
     // }
 
-    @Get(':templateId')
+    @Get('user/:userId')
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async getResponsesByUserId(@Param('userId') userId: string, @Res() res: Response) {
+        try {
+            const response = await this.responseService.getResponsesByUserId(userId);
+            res.status(HttpStatus.OK).send(response);
+        } catch (error) {
+            res.status(HttpStatus.BAD_REQUEST).send(error);
+        }
+    }
+
+    @Get('template/:templateId')
     @UseGuards(JwtAuthGuard, ResponseGuard)
     async getResponsesByTemplateId(@Param('templateId') templateId: string, @Res() res: Response) {
         try {
