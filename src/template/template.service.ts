@@ -49,7 +49,9 @@ export class TemplateService {
 
         if (!template) throw new NotFoundException(`Template with id ${templateId} is not found`);
 
-        let questions = template.questions.map(question => ({ ...question, answer: '' }));
+        let questions = template.questions
+            .map(question => ({ ...question, answer: '' }))
+            .sort((a, b) => a.order - b.order);
         const response = userId
             ? await this.responseService.getResponseByUserAndTemplateId(userId, template.id)
             : null;

@@ -81,10 +81,10 @@ export class QuestionService {
             description,
             isVisible,
             type,
+            order: questions.length + 1,
             template: {
                 id: templateId,
-            },
-            order: questions.length + 1
+            }
         });
 
         return await this.questionRepository.save(createdQuestion);

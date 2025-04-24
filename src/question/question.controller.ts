@@ -103,10 +103,10 @@ export class QuestionController {
     }
 
     @Patch('reorder')
-    async reorderQuestions(@Body() questionIds: string[], @Res() res: Response) {
+    async reorderQuestions(@Body('questionIds') questionIds: string[], @Res() res: Response) {
         try {
             const message = await this.questionService.reorderQuestions(questionIds);
-            res.status(HttpStatus.OK).send({ message });
+            res.status(HttpStatus.OK).send(message);
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);
         }
