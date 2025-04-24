@@ -70,6 +70,12 @@ export class QuestionService {
         type: string,
         templateId: string,
     ) => {
+        const questions = await this.questionRepository.find({
+            where: {
+                template: { id: templateId }
+            }
+        })
+
         const createdQuestion = this.questionRepository.create({
             title,
             description,
@@ -77,7 +83,8 @@ export class QuestionService {
             type,
             template: {
                 id: templateId,
-            }
+            },
+            order: questions.length + 1
         });
 
         return await this.questionRepository.save(createdQuestion);
@@ -94,5 +101,14 @@ export class QuestionService {
         if (result.affected === 0) throw new NotFoundException('Question not found or already deleted');
 
         return `Question with ID ${questionId} deleted successfully`;
+    }
+
+    reorderQuestions = async (questionIds: string[]) => {
+        const updatePromises = questionIds.map((id, index) =>
+            this.questionRepository.update(id, { order: index })
+        );
+
+        await Promise.all(updatePromises);
+        return { message: 'Order updated' };
     }
 }

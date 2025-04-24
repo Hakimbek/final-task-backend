@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Res, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Res, HttpStatus, Patch } from "@nestjs/common";
 import { QuestionService } from "./question.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { QuestionDto, EditQuestionDto } from "./question.dto";
@@ -96,6 +96,16 @@ export class QuestionController {
                 isVisible,
                 type
             );
+            res.status(HttpStatus.OK).send({ message });
+        } catch (error) {
+            res.status(HttpStatus.BAD_REQUEST).send(error);
+        }
+    }
+
+    @Patch('reorder')
+    async reorderQuestions(@Body() questionIds: string[], @Res() res: Response) {
+        try {
+            const message = await this.questionService.reorderQuestions(questionIds);
             res.status(HttpStatus.OK).send({ message });
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);

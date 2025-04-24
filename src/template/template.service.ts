@@ -44,7 +44,7 @@ export class TemplateService {
     getTemplateByID = async (templateId: string, userId?: string) => {
         const template = await this.templateRepository.findOne({
             where: { id: templateId },
-            relations: ['user', 'questions']
+            relations: ['questions']
         });
 
         if (!template) throw new NotFoundException(`Template with id ${templateId} is not found`);

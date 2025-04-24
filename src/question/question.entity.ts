@@ -19,6 +19,9 @@ export class Question {
     @Column({ nullable: false })
     type: string;
 
+    @Column({ type: 'int', nullable: false })
+    order: number;
+
     @ManyToOne(() => Template, template => template.questions, {
         onDelete: 'CASCADE'
     })
