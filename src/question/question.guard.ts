@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { QuestionService } from "./question.service";
 import { UserService } from "../user/user.service";
@@ -13,13 +13,6 @@ export class QuestionGuard implements CanActivate {
         private readonly templateService: TemplateService,
     ) {}
 
-    /**
-     * Checks whether user is admin or the owner of the question. If user is admin, everything is allowed.
-     * If user is owner of the question, they also can edit/delete the question.
-     * If user is not admin/owner they can only see/fill the question.
-     * They can't delete/edit the question.
-     * @param context - used to get user id from token and template id from request params.
-     */
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = request.headers?.authorization.split(' ')[1];
@@ -40,6 +33,6 @@ export class QuestionGuard implements CanActivate {
             if (user?.id === template?.user?.id) return true;
         }
 
-        throw new ForbiddenException('You are not the owner of this question');
+        throw new ForbiddenException("You are not the owner of this question");
     }
 }

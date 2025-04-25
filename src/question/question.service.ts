@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Question } from "./question.entity";
 
@@ -10,59 +10,17 @@ export class QuestionService {
        private readonly questionRepository: Repository<Question>,
     ) {}
 
-    /**
-     * Gets question by question id.
-     * @param questionId - question id.
-     * @returns A question if exists, otherwise throws an error.
-     */
     getQuestionById = async (questionId : string) => {
         const question = await this.questionRepository.findOne({
             where: { id: questionId },
-            relations: ['template'],
+            relations: ["template"],
         });
 
-        if (!question) throw new NotFoundException(`Question with id ${questionId} not found`);
+        if (!question) throw new NotFoundException("Question not found");
 
         return question;
     }
 
-    /**
-     * Edits question by question id.
-     * @param questionId - gets question id from params.
-     * @param title - question title.
-     * @param description - question description.
-     * @param type - question type.
-     * @param isVisible - question visibility.
-     * @returns A message, if question updated successfully, otherwise throws an error.
-     */
-    editQuestionById = async (
-        questionId: string,
-        title: string,
-        description: string,
-        isVisible: boolean,
-        type: string,
-    ) => {
-        const question = await this.getQuestionById(questionId);
-
-        question.title = title;
-        question.description = description;
-        question.type = type;
-        question.isVisible = isVisible;
-
-        await this.questionRepository.save(question);
-
-        return 'Question is edited successfully';
-    }
-
-    /**
-     * Creates question.
-     * @param title - template title.
-     * @param description - template description.
-     * @param type - question type.
-     * @param isVisible - question visibility.
-     * @param templateId - template id what does question belong to.
-     * @returns A newly created question.
-     */
     createQuestion = async (
         title: string,
         description: string,
@@ -90,17 +48,31 @@ export class QuestionService {
         return await this.questionRepository.save(createdQuestion);
     }
 
-    /**
-     * Deletes question by id.
-     * @param questionId - question id.
-     * @returns A message, if question deleted successfully, otherwise throws an error.
-     */
+    editQuestionById = async (
+        questionId: string,
+        title: string,
+        description: string,
+        isVisible: boolean,
+        type: string,
+    ) => {
+        const question = await this.getQuestionById(questionId);
+
+        question.title = title;
+        question.description = description;
+        question.type = type;
+        question.isVisible = isVisible;
+
+        await this.questionRepository.save(question);
+
+        return { message: "Question successfully edited" };
+    }
+
     deleteQuestionById = async (questionId: string) => {
         const result = await this.questionRepository.delete(questionId);
 
-        if (result.affected === 0) throw new NotFoundException('Question not found or already deleted');
+        if (result.affected === 0) throw new NotFoundException("Question not found or already deleted");
 
-        return `Question with ID ${questionId} deleted successfully`;
+        return { message: "Question successfully deleted" };
     }
 
     reorderQuestions = async (questionIds: string[]) => {
@@ -109,6 +81,6 @@ export class QuestionService {
         );
 
         await Promise.all(updatePromises);
-        return { message: 'Order updated' };
+        return { message: "Order updated" };
     }
 }

@@ -4,7 +4,7 @@ import { Answer } from "../answer/answer.entity";
 
 @Entity()
 export class Question {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column({ nullable: false })
@@ -19,11 +19,11 @@ export class Question {
     @Column({ nullable: false })
     type: string;
 
-    @Column({ type: 'int', nullable: false })
+    @Column({ type: "int", nullable: false })
     order: number;
 
     @ManyToOne(() => Template, template => template.questions, {
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     template: Template;
 

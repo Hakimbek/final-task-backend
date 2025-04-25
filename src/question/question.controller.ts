@@ -1,114 +1,80 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Res, HttpStatus, Patch } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Patch, BadRequestException } from "@nestjs/common";
 import { QuestionService } from "./question.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { QuestionDto, EditQuestionDto } from "./question.dto";
-import { Response } from "express";
 import { QuestionGuard } from "./question.guard";
+import { ReorderDto } from "./question.dto";
 
-@Controller('question')
+@Controller("question")
 export class QuestionController {
     constructor(
         private readonly questionService: QuestionService
     ) {}
 
-    /**
-     * Gets question by question id. Only the owner and admin are allowed.
-     * @param questionId - gets question id from params.
-     * @param res - response.
-     */
-    @Get(':questionId')
+    @Get(":questionId")
     @UseGuards(JwtAuthGuard, QuestionGuard)
-    async getQuestionById(@Param('questionId') questionId: string, @Res() res: Response) {
+    async getQuestionById(@Param("questionId") questionId: string) {
         try {
-            const question = await this.questionService.getQuestionById(questionId);
-            res.status(HttpStatus.OK).send(question);
+            return await this.questionService.getQuestionById(questionId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    /**
-     * Creates question. Only the owner and admin are allowed.
-         * @param templateId - template id what does question belong to.
-     * @param title - question title.
-     * @param description - question description.
-     * @param type - question type.
-     * @param isVisible - question visibility.
-     * @param res - response.
-     */
     @Post()
     @UseGuards(JwtAuthGuard, QuestionGuard)
     async createQuestion(
         @Body() { title, description, type, isVisible, templateId }: QuestionDto,
-        @Res() res: Response
     ) {
         try {
-            const question = await this.questionService.createQuestion(
+            return await this.questionService.createQuestion(
                 title,
                 description,
                 isVisible,
                 type,
                 templateId
             );
-            res.status(HttpStatus.OK).send(question);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    /**
-     * Deletes question by question id. Only the owner and admin are allowed.
-     * @param questionId - gets question id from params.
-     * @param res - response.
-     */
-    @Delete(':questionId')
+    @Delete(":questionId")
     @UseGuards(JwtAuthGuard, QuestionGuard)
-    async deleteQuestionById(@Param('questionId') questionId: string, @Res() res: Response) {
+    async deleteQuestionById(@Param("questionId") questionId: string) {
         try {
-            const message = await this.questionService.deleteQuestionById(questionId);
-            res.status(HttpStatus.OK).send({ message });
+            return await this.questionService.deleteQuestionById(questionId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    /**
-     * Edits question by question id. Only the owner and admin are allowed.
-     * @param questionId - gets question id from params.
-     * @param title - question title.
-     * @param description - question description.
-     * @param type - question type.
-     * @param isVisible - question visibility.
-     * @param res - response.
-     */
-    @Put(':questionId')
+    @Put(":questionId")
     @UseGuards(JwtAuthGuard, QuestionGuard)
     async editQuestionById(
-        @Param('questionId') questionId: string,
-        @Body() { title, description, type, isVisible }: EditQuestionDto,
-        @Res() res: Response
+        @Param("questionId") questionId: string,
+        @Body() { title, description, type, isVisible }: EditQuestionDto
     ) {
         try {
-            const message = await this.questionService.editQuestionById(
+            return await this.questionService.editQuestionById(
                 questionId,
                 title,
                 description,
                 isVisible,
                 type
             );
-            res.status(HttpStatus.OK).send({ message });
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Patch('reorder')
-    async reorderQuestions(@Body('questionIds') questionIds: string[], @Res() res: Response) {
+    @Patch("reorder")
+    @UseGuards(JwtAuthGuard, QuestionGuard)
+    async reorderQuestions(@Body() { questionIds }: ReorderDto) {
         try {
-            const message = await this.questionService.reorderQuestions(questionIds);
-            res.status(HttpStatus.OK).send(message);
+            return await this.questionService.reorderQuestions(questionIds);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 }
