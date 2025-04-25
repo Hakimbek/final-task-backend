@@ -89,7 +89,7 @@ export class ResponseService {
         token: { id: string },
     ) => {
         const authorizedUser = await this.userService.findById(token?.id);
-        const template = await this.templateService.getTemplateByID(templateId);
+        const template = await this.templateService.getTemplateById(templateId);
         const response = await this.getResponseByUserAndTemplateId(userId, templateId);
 
         if (response) {

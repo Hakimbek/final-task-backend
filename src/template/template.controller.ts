@@ -45,20 +45,15 @@ export class TemplateController {
     /**
      * Gets template by user id and template id. This path is open.
      * @param templateId - gets template id from params.
-     * @param userId - gets user id from query.
      * @param res - response.
      */
     @Get(':templateId')
     async getTemplateById(
         @Param('templateId') templateId: string,
-        @Query('userId') userId: string,
         @Res() res: Response
     ) {
         try {
-            const template = await this.templateService.getTemplateByID(
-                templateId,
-                userId
-            );
+            const template = await this.templateService.getTemplateById(templateId);
             res.status(HttpStatus.OK).send(template);
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);

@@ -35,7 +35,7 @@ export class QuestionGuard implements CanActivate {
         }
 
         if (request?.body?.templateId) {
-            const template = await this.templateService.getTemplateByID(request?.body?.templateId);
+            const template = await this.templateService.getTemplateById(request?.body?.templateId);
 
             if (user?.id === template?.user?.id) return true;
         }

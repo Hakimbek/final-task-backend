@@ -28,7 +28,7 @@ export class ResponseGuard implements CanActivate {
         if (user?.isAdmin) return true;
 
         if (request?.params?.templateId) {
-            const template = await this.templateService.getTemplateByID(request?.params?.templateId);
+            const template = await this.templateService.getTemplateById(request?.params?.templateId);
 
             if (user?.id === template?.user?.id) return true;
         }
