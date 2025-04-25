@@ -1,82 +1,69 @@
-import { Controller, Get, Param, Delete, UseGuards, Post, Body, Res, HttpStatus, Headers, Put } from "@nestjs/common";
+import { Controller, Get, Param, Delete, UseGuards, Post, Body, Put, BadRequestException } from "@nestjs/common";
 import { ResponseService } from "./response.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { ResponseDto } from "./response.dto";
-import { Response } from "express";
 import { ResponseGuard } from "./response.guard";
-import { JwtService } from "@nestjs/jwt";
 
-@Controller('response')
+@Controller("response")
 export class ResponseController {
     constructor(
-        private readonly responseService: ResponseService,
-        private readonly jwtService: JwtService,
+        private readonly responseService: ResponseService
     ) {}
 
-    @Get('user/:userId')
+    @Get("user/:userId")
     @UseGuards(JwtAuthGuard, ResponseGuard)
-    async getResponsesByUserId(@Param('userId') userId: string, @Res() res: Response) {
+    async getResponsesByUserId(@Param("userId") userId: string) {
         try {
-            const response = await this.responseService.getResponsesByUserId(userId);
-            res.status(HttpStatus.OK).send(response);
+            return await this.responseService.getResponsesByUserId(userId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
     @Get('template/:templateId')
     @UseGuards(JwtAuthGuard, ResponseGuard)
-    async getResponsesByTemplateId(@Param('templateId') templateId: string, @Res() res: Response) {
+    async getResponsesByTemplateId(@Param('templateId') templateId: string) {
         try {
-            const response = await this.responseService.getResponsesByTemplateId(templateId);
-            res.status(HttpStatus.OK).send(response);
+            return await this.responseService.getResponsesByTemplateId(templateId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async createResponse(
-        @Body() { userId, templateId, answers }: ResponseDto,
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-    ) {
+    async createResponse(@Body() { userId, templateId, answers }: ResponseDto) {
         try {
-            const message = await this.responseService.createResponse(
+            return await this.responseService.createResponse(
                 userId,
                 templateId,
                 answers
             );
-            res.status(HttpStatus.OK).send({ message });
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
     @Put()
     @UseGuards(JwtAuthGuard, ResponseGuard)
-    async createOrUpdateResponse(
-        @Param('responseId') responseId: string,
-        @Res() res: Response,
-        @Body('answers') answers: { questionId: string; answer: string }[],
+    async editResponseById(
+        @Param("responseId") responseId: string,
+        @Body("answers") answers: { questionId: string; answer: string }[],
     ) {
         try {
-            const message = await this.responseService.editResponseById(responseId, answers);
-            res.status(HttpStatus.OK).send({ message });
+            return await this.responseService.editResponseById(responseId, answers);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Delete(':responseId')
+    @Delete(":responseId")
     @UseGuards(JwtAuthGuard, ResponseGuard)
-    async deleteResponseById(@Param('responseId') responseId: string, @Res() res: Response) {
+    async deleteResponseById(@Param("responseId") responseId: string) {
         try {
-            const message = await this.responseService.deleteResponseById(responseId);
-            res.status(HttpStatus.OK).send({ message });
+            return await this.responseService.deleteResponseById(responseId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 }

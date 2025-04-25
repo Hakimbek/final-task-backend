@@ -4,19 +4,19 @@ import { Template } from "../template/template.entity";
 import { Answer } from "../answer/answer.entity";
 
 @Entity()
-@Unique(['user', 'template'])
+@Unique(["user", "template"])
 export class Response {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @ManyToOne(() => User, user => user.responses, {
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
         eager: true
     })
     user: User;
 
     @ManyToOne(() => Template, template => template.responses, {
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
         eager: true
     })
     template: Template;
