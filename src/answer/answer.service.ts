@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 import { Answer } from "./answer.entity";
 import { Repository } from "typeorm";
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class AnswerService {
