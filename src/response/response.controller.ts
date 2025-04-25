@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Delete, UseGuards, Post, Body, Res, HttpStatus, Headers } from "@nestjs/common";
+import { Controller, Get, Param, Delete, UseGuards, Post, Body, Res, HttpStatus, Headers, Put } from "@nestjs/common";
 import { ResponseService } from "./response.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { ResponseDto } from "./response.dto";
@@ -37,19 +37,32 @@ export class ResponseController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async createOrUpdateResponse(
+    async createResponse(
         @Body() { userId, templateId, answers }: ResponseDto,
         @Res() res: Response,
         @Headers('authorization') authHeader: string
     ) {
         try {
-            const token = authHeader?.split(' ')[1];
-            const message = await this.responseService.createOrUpdateResponse(
+            const message = await this.responseService.createResponse(
                 userId,
                 templateId,
-                answers,
-                this.jwtService.decode(token)
-                );
+                answers
+            );
+            res.status(HttpStatus.OK).send({ message });
+        } catch (error) {
+            res.status(HttpStatus.BAD_REQUEST).send(error);
+        }
+    }
+
+    @Put()
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async createOrUpdateResponse(
+        @Param('responseId') responseId: string,
+        @Res() res: Response,
+        @Body('answers') answers: { questionId: string; answer: string }[],
+    ) {
+        try {
+            const message = await this.responseService.editResponseById(responseId, answers);
             res.status(HttpStatus.OK).send({ message });
         } catch (error) {
             res.status(HttpStatus.BAD_REQUEST).send(error);

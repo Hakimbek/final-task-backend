@@ -50,8 +50,8 @@ export class AnswerService {
         }
     }
 
-    updateAnswerById = async (id: string, questionId: string, answer: string) => {
-        const existedAnswer = await this.getAnswerByResponseAndQuestionId(id, questionId);
+    updateAnswerById = async (responseId: string, questionId: string, answer: string) => {
+        const existedAnswer = await this.getAnswerByResponseAndQuestionId(responseId, questionId);
 
         if (!existedAnswer) throw new ConflictException("Cannot update answer");
 

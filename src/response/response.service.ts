@@ -71,6 +71,37 @@ export class ResponseService {
         });
     }
 
+    createResponse = async (
+        userId: string,
+        templateId: string,
+        answers: { questionId: string; answer: string }[]
+    ) => {
+        const createdResponse = this.responseRepository.create({
+            user: { id: userId },
+            template: { id: templateId }
+        });
+        const response = await this.responseRepository.save(createdResponse);
+        const createAnswers = answers.map(({ questionId, answer }) => {
+            return this.answerService.create(response.id, questionId, answer);
+        })
+        await Promise.all(createAnswers);
+
+        return 'Response created successfully';
+    }
+
+    editResponseById = async (
+        responseId: string,
+        answers: { questionId: string; answer: string }[]
+    ) => {
+        const response = await this.getResponseById(responseId);
+
+        await Promise.all(answers.map(async ({ questionId, answer }) => {
+            await this.answerService.updateAnswerById(response.id, questionId, answer)
+        }))
+
+        return 'Response updated successfully';
+    }
+
     /**
      * Creates or updates response. If response is not existed, a new response is created by user and template id.
      * Then, new answers are created using newly created response id. If response exists,
