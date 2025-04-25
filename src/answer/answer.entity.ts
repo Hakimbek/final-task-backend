@@ -4,16 +4,16 @@ import { Response } from "../response/response.entity";
 
 @Entity()
 export class Answer {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @ManyToOne(() => Response, response => response.answers, {
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     response: Response;
 
     @ManyToOne(() => Question, question => question.answers, {
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     question: Question;
 
