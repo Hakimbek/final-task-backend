@@ -24,12 +24,12 @@ export class AuthService {
 
     if (!user.isActive) throw new UnauthorizedException("User is disabled");
 
-    return { token: this.jwtService.sign({ id: user.id }), id: user.id };
+    return { token: this.jwtService.sign({ id: user.id }), userId: user.id };
   }
 
   signup = async (email: string, firstname: string, lastname: string, password: string) => {
     await this.userService.create(email, firstname, lastname, password);
 
-    return "User successfully created. Please login";
+    return { message: "User successfully created. Please login" };
   }
 }
