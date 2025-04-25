@@ -77,7 +77,7 @@ export class QuestionService {
 
     reorderQuestions = async (questionIds: string[]) => {
         const updatePromises = questionIds.map((id, index) =>
-            this.questionRepository.update(id, { order: index })
+            this.questionRepository.update(id, { order: index + 1 })
         );
 
         await Promise.all(updatePromises);
