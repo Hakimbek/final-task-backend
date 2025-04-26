@@ -82,7 +82,7 @@ export class ResponseService {
         });
         const response = await this.responseRepository.save(createdResponse);
         const createAnswers = answers.map(({ questionId, answer }) => {
-            return this.answerService.create(response.id, questionId, answer);
+            return this.answerService.createAnswer(response.id, questionId, answer);
         })
         await Promise.all(createAnswers);
 

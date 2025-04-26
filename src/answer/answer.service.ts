@@ -10,40 +10,43 @@ export class AnswerService {
         private readonly answerRepository: Repository<Answer>,
     ) {}
 
-    getAnswerByResponseAndQuestionId = async (responseId: string, questionId: string) => {
-        return await this.answerRepository.findOne({
+    getAnswerByResponseAndQuestionId = (
+        responseId: string,
+        questionId: string
+    ): Promise<Answer | null> => {
+        return this.answerRepository.findOne({
             where: {
-                response: {
-                    id: responseId
-                },
-                question: {
-                    id: questionId
-                }
+                response: { id: responseId },
+                question: { id: questionId }
             }
         });
     }
 
-    create = async (responseId: string, questionId: string, answer: string) => {
+    createAnswer = (
+        responseId: string,
+        questionId: string,
+        answer: string
+    ): Promise<Answer> => {
         const createdAnswer = this.answerRepository.create({
-            response: {
-                id: responseId
-            },
-            question: {
-                id: questionId
-            },
+            response: { id: responseId },
+            question: { id: questionId },
             value: answer
         });
 
-        return await this.answerRepository.save(createdAnswer);
+        return this.answerRepository.save(createdAnswer);
     }
 
-    updateAnswerById = async (responseId: string, questionId: string, answer: string) => {
+    updateAnswerById = async (
+        responseId: string,
+        questionId: string,
+        answer: string
+    ): Promise<Answer> => {
         const existedAnswer = await this.getAnswerByResponseAndQuestionId(responseId, questionId);
 
         if (!existedAnswer) throw new ConflictException("Cannot update answer");
 
         existedAnswer.value = answer;
 
-        await this.answerRepository.save(existedAnswer);
+        return this.answerRepository.save(existedAnswer);
     }
 }
