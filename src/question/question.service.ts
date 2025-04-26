@@ -10,7 +10,9 @@ export class QuestionService {
        private readonly questionRepository: Repository<Question>,
     ) {}
 
-    getQuestionById = async (questionId : string) => {
+    getQuestionById = async (
+        questionId : string
+    ): Promise<Question> => {
         const question = await this.questionRepository.findOne({
             where: { id: questionId },
             relations: ["template"],
@@ -27,7 +29,7 @@ export class QuestionService {
         isVisible: boolean,
         type: string,
         templateId: string,
-    ) => {
+    ): Promise<Question> => {
         const questions = await this.questionRepository.find({
             where: {
                 template: { id: templateId }
@@ -45,7 +47,7 @@ export class QuestionService {
             }
         });
 
-        return await this.questionRepository.save(createdQuestion);
+        return this.questionRepository.save(createdQuestion);
     }
 
     editQuestionById = async (
@@ -54,7 +56,7 @@ export class QuestionService {
         description: string,
         isVisible: boolean,
         type: string,
-    ) => {
+    ): Promise<{ message: string }> => {
         const question = await this.getQuestionById(questionId);
 
         question.title = title;
@@ -67,7 +69,9 @@ export class QuestionService {
         return { message: "Question successfully edited" };
     }
 
-    deleteQuestionById = async (questionId: string) => {
+    deleteQuestionById = async (
+        questionId: string
+    ): Promise<{ message: string }> => {
         const result = await this.questionRepository.delete(questionId);
 
         if (result.affected === 0) throw new NotFoundException("Question not found or already deleted");
@@ -75,12 +79,15 @@ export class QuestionService {
         return { message: "Question successfully deleted" };
     }
 
-    reorderQuestions = async (questionIds: string[]) => {
+    reorderQuestions = async (
+        questionIds: string[]
+    ): Promise<{ message: string }> => {
         const updatePromises = questionIds.map((id, index) =>
             this.questionRepository.update(id, { order: index + 1 })
         );
 
         await Promise.all(updatePromises);
+
         return { message: "Order updated" };
     }
 }
