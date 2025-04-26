@@ -13,3 +13,11 @@ export class ResponseDto {
         answer: string;
     }[] = []
 }
+
+export class EditResponseDto {
+    @IsArray({ message: "answers must be an array" })
+    answers: {
+        questionId: string;
+        answer: string;
+    }[] = []
+}

@@ -1,4 +1,12 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from "@nestjs/common";
+import {
+    ConflictException,
+    Injectable,
+    NotFoundException,
+    Inject,
+    forwardRef,
+    BadRequestException,
+    ForbiddenException
+} from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from "typeorm";
 import { Response } from "./response.entity";
@@ -25,18 +33,30 @@ export class ResponseService {
         return response;
     }
 
-    getResponsesByTemplateId = async (templateId: string) => {
-        return await this.responseRepository.find({
+    getResponsesByTemplateId = (templateId: string) => {
+        return this.responseRepository.find({
             where: {
                 template: { id: templateId }
             }
         });
     }
 
-    getResponsesByUserId = async (userId: string) => {
-        return await this.responseRepository.find({
+    getResponsesByUserId = (userId: string) => {
+        return this.responseRepository.find({
             where: {
                 user: { id: userId }
+            }
+        });
+    }
+
+    getResponseByUserAndTemplateId = (
+        userId: string,
+        templateId: string
+    ): Promise<Response | null> => {
+        return this.responseRepository.findOne({
+            where: {
+                user: { id: userId },
+                template: { id: templateId }
             }
         });
     }
@@ -44,8 +64,18 @@ export class ResponseService {
     createResponse = async (
         userId: string,
         templateId: string,
-        answers: { questionId: string; answer: string }[]
+        answers: { questionId: string; answer: string }[],
+        authUserId: string
     ) => {
+        const user = await this.userService.findById(authUserId);
+
+        if (userId !== user?.id) throw new ForbiddenException("Action is not allowed");
+
+        const isResponseExist = await this.getResponseByUserAndTemplateId(userId, templateId);
+
+        if (answers.length === 0) throw new BadRequestException("There is no answer");
+        if (isResponseExist) throw new ConflictException("Response already exists");
+
         const createdResponse = this.responseRepository.create({
             user: { id: userId },
             template: { id: templateId }
@@ -56,7 +86,7 @@ export class ResponseService {
         })
         await Promise.all(createAnswers);
 
-        return "Response created successfully";
+        return { message: "Response created successfully" };
     }
 
     editResponseById = async (
@@ -69,7 +99,7 @@ export class ResponseService {
             await this.answerService.updateAnswerById(response.id, questionId, answer)
         }))
 
-        return "Response updated successfully";
+        return { message: "Response updated successfully" };
     }
 
     deleteResponseById = async (responseId: string) => {
@@ -77,6 +107,6 @@ export class ResponseService {
 
         if (result.affected === 0) throw new NotFoundException("Response not found or already deleted");
 
-        return "Response successfully deleted";
+        return { message: "Response successfully deleted" };
     }
 }

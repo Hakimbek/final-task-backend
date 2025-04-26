@@ -1,13 +1,15 @@
-import { Controller, Get, Param, Delete, UseGuards, Post, Body, Put, BadRequestException } from "@nestjs/common";
+import {Controller, Get, Param, Delete, UseGuards, Post, Body, Put, BadRequestException, Headers} from "@nestjs/common";
 import { ResponseService } from "./response.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
-import { ResponseDto } from "./response.dto";
+import { ResponseDto, EditResponseDto } from "./response.dto";
 import { ResponseGuard } from "./response.guard";
+import { JwtService } from "@nestjs/jwt";
 
 @Controller("response")
 export class ResponseController {
     constructor(
-        private readonly responseService: ResponseService
+        private readonly responseService: ResponseService,
+        private readonly jwtService: JwtService
     ) {}
 
     @Get("user/:userId")
@@ -32,23 +34,28 @@ export class ResponseController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async createResponse(@Body() { userId, templateId, answers }: ResponseDto) {
+    async createResponse(
+        @Body() { userId, templateId, answers }: ResponseDto,
+        @Headers('authorization') authHeader: string
+    ) {
         try {
+            const authUserId = this.jwtService.decode(authHeader?.split(' ')[1])?.id;
             return await this.responseService.createResponse(
                 userId,
                 templateId,
-                answers
+                answers,
+                authUserId
             );
         } catch (error) {
             throw new BadRequestException(error.response);
         }
     }
 
-    @Put()
+    @Put(":responseId")
     @UseGuards(JwtAuthGuard, ResponseGuard)
     async editResponseById(
         @Param("responseId") responseId: string,
-        @Body("answers") answers: { questionId: string; answer: string }[],
+        @Body() { answers }: EditResponseDto,
     ) {
         try {
             return await this.responseService.editResponseById(responseId, answers);
