@@ -10,10 +10,12 @@ export class TemplateService {
         private readonly templateRepository: Repository<Template>,
     ) {}
 
-    getTemplates = async (term: string = '') => {
-        if (!term.trim()) return await this.templateRepository.find();
+    getTemplates = (
+        term: string = ''
+    ): Promise<Template[]> => {
+        if (!term.trim()) return this.templateRepository.find();
 
-        return await this.templateRepository
+        return this.templateRepository
             .createQueryBuilder("template")
             .leftJoinAndSelect("template.user", "user")
             .where(
@@ -23,7 +25,9 @@ export class TemplateService {
             .getMany();
     }
 
-    getTemplateById = async (templateId: string) => {
+    getTemplateById = async (
+        templateId: string
+    ): Promise<Template> => {
         const template = await this.templateRepository.findOne({
             where: { id: templateId },
             relations: ["questions"]
@@ -40,7 +44,7 @@ export class TemplateService {
         userId: string,
         topic: string,
         tags: string[]
-    ) => {
+    ): Promise<Template> => {
         const createdTemplate = this.templateRepository.create({
             title,
             description,
@@ -60,7 +64,7 @@ export class TemplateService {
         description: string,
         topic: string,
         tags: string[]
-    ) => {
+    ): Promise<{ message: string }> => {
         const template = await this.getTemplateById(templateId);
 
         template.title = title;
@@ -73,7 +77,9 @@ export class TemplateService {
         return { message: "Template successfully edited" };
     }
 
-    deleteTemplateById = async (templateId: string) => {
+    deleteTemplateById = async (
+        templateId: string
+    ): Promise<{ message: string }> => {
         const result = await this.templateRepository.delete(templateId);
 
         if (result.affected === 0) throw new NotFoundException("Template is not found or already deleted");

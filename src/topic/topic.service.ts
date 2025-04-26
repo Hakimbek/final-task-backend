@@ -10,5 +10,5 @@ export class TopicService {
         private readonly topicRepository: Repository<Topic>,
     ) {}
 
-    getAllTopics = async () => await this.topicRepository.find();
+    getAllTopics = (): Promise<Topic[]> => this.topicRepository.find();
 }
