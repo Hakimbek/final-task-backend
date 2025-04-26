@@ -9,16 +9,18 @@ import {
     Res,
     HttpStatus,
     Headers,
-    ForbiddenException
-} from '@nestjs/common';
-import { UserService } from './user.service';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+    ForbiddenException,
+    BadRequestException
+} from "@nestjs/common";
+import { UserService } from "./user.service";
+import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { UserGuard } from "./user.guard";
 import { UpdateUserDto, UpdateImageDto } from "./user.dto";
 import { Response } from "express";
 import { JwtService } from "@nestjs/jwt";
+import { AdminGuard } from "./admin.guard";
 
-@Controller('user')
+@Controller("user")
 export class UserController {
     constructor(
         private readonly userService: UserService,
@@ -26,164 +28,108 @@ export class UserController {
     ) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
-    async getAllUsers(
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async getAllUsers() {
+        try {
+            return await this.userService.getAllUsers();
+        } catch (error) {
+            throw new BadRequestException(error.response);
+        }
+    }
+
+    @Get(":userId")
+    @UseGuards(JwtAuthGuard, UserGuard)
+    async getUserById(@Param("userId") userId: string) {
+        try {
+            return await this.userService.findById(userId);
+        } catch (error) {
+            throw new BadRequestException(error.response);
+        }
+    }
+
+    @Put("upload/:userId")
+    @UseGuards(JwtAuthGuard, UserGuard)
+    async uploadImage(
+        @Param("userId") userId: string,
+        @Body() { url }: UpdateImageDto
     ) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            const users = await this.userService.getAllUsers();
-            res.status(HttpStatus.OK).send(users);
+            return await this.userService.uploadImage(url, userId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Get(':userId')
+    @Put("edit/:userId")
     @UseGuards(JwtAuthGuard, UserGuard)
-    async getById(@Param('userId') userId: string, @Res() res: Response) {
+    async updateById(
+        @Param("userId") userId: string,
+        @Body() { firstname, lastname }: UpdateUserDto
+    ) {
         try {
-            const user = await this.userService.findById(userId);
-            res.status(HttpStatus.OK).send(user);
+            return await this.userService.updateById(userId, firstname, lastname);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Put('upload/:userId')
+    @Delete(":userId")
     @UseGuards(JwtAuthGuard, UserGuard)
-    async uploadImage(@Param('userId') userId: string, @Body() { url }: UpdateImageDto, @Res() res: Response) {
+    async deleteById(@Param("userId") userId: string) {
         try {
-            const message = await this.userService.uploadImage(url, userId);
-            res.status(HttpStatus.OK).send({ message });
+            return await this.userService.deleteById(userId);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
-        }
-    }
-
-    @Put('edit/:userId')
-    @UseGuards(JwtAuthGuard, UserGuard)
-    async updateById(@Param('userId') userId: string, @Body() { firstname, lastname }: UpdateUserDto, @Res() res: Response) {
-        try {
-            const message = await this.userService.updateById(userId, firstname, lastname);
-            res.status(HttpStatus.OK).send({ message });
-        } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
-        }
-    }
-
-    @Delete(':userId')
-    @UseGuards(JwtAuthGuard, UserGuard)
-    async deleteById(@Param('userId') userId: string, @Res() res: Response) {
-        try {
-            const message = await this.userService.deleteById(userId);
-            res.status(HttpStatus.OK).send({ message });
-        } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
     @Delete()
-    @UseGuards(JwtAuthGuard)
-    async deleteByIds(
-        @Body('userIds') userIds: string[],
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-        ) {
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async deleteByIds(@Body("userIds") userIds: string[]) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            await this.userService.deleteByIds(userIds);
-            res.status(HttpStatus.OK).send({ message: 'Successfully deleted' });
+            return await this.userService.deleteByIds(userIds);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Put('activate')
-    @UseGuards(JwtAuthGuard)
-    async activateUserByIds(
-        @Body('userIds') userIds: string[],
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-    ) {
+    @Put("activate")
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async activateUserByIds(@Body("userIds") userIds: string[]) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            await this.userService.changeStatusByIds(userIds, true);
-            res.status(HttpStatus.OK).send({ message: 'Successfully activated' });
+            return await this.userService.changeStatusByIds(userIds, true);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Put('deactivate')
-    @UseGuards(JwtAuthGuard)
-    async deactivateUserByIds(
-        @Body('userIds') userIds: string[],
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-    ) {
+    @Put("deactivate")
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async deactivateUserByIds(@Body("userIds") userIds: string[]) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            await this.userService.changeStatusByIds(userIds, false);
-            res.status(HttpStatus.OK).send({ message: 'Successfully deactivated' });
+            return await this.userService.changeStatusByIds(userIds, false);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Put('admin')
-    @UseGuards(JwtAuthGuard)
-    async makeUserAdminByIds(
-        @Body('userIds') userIds: string[],
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-    ) {
+    @Put("admin")
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async makeUserAdminByIds(@Body("userIds") userIds: string[]) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            await this.userService.changeRoleByIds(userIds, true);
-            res.status(HttpStatus.OK).send({ message: 'Success' });
+            return await this.userService.changeRoleByIds(userIds, true);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 
-    @Put('user')
-    @UseGuards(JwtAuthGuard)
-    async makeUserUserByIds(
-        @Body('userIds') userIds: string[],
-        @Res() res: Response,
-        @Headers('authorization') authHeader: string
-    ) {
+    @Put("user")
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async makeUserUserByIds(@Body("userIds") userIds: string[]) {
         try {
-            const token = this.jwtService.decode(authHeader?.split(' ')[1]);
-            const user = await this.userService.findById(token?.id);
-
-            if (!user?.isAdmin) throw new ForbiddenException('Not allowed');
-
-            await this.userService.changeRoleByIds(userIds, false);
-            res.status(HttpStatus.OK).send({ message: 'Success' });
+            return await this.userService.changeRoleByIds(userIds, false);
         } catch (error) {
-            res.status(HttpStatus.BAD_REQUEST).send(error);
+            throw new BadRequestException(error.response);
         }
     }
 }
