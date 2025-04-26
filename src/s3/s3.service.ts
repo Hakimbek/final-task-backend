@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuid } from "uuid";
 
@@ -28,5 +28,19 @@ export class S3Service {
         const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 60 });
 
         return { signedUrl, key };
+    }
+
+    async deleteImageFromUrl(imageUrl: string): Promise<string> {
+        const url = new URL(imageUrl);
+        const key = decodeURIComponent(url.pathname.slice(1));
+
+        const command = new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: key,
+        });
+
+        await this.s3.send(command);
+
+        return "Deleted";
     }
 }

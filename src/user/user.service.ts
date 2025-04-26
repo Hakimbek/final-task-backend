@@ -3,12 +3,14 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./user.entity";
 import { In, Repository } from "typeorm";
 import { selectUserWithoutPassword } from "./user.dto";
+import { S3Service } from "../s3/s3.service";
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        private readonly s3Service: S3Service,
     ) {}
 
     getAllUsers = (): Promise<User[]> => this.userRepository.find({
@@ -51,6 +53,7 @@ export class UserService {
         id: string
     ): Promise<{ message: string }> => {
         const user = await this.findById(id);
+        await this.s3Service.deleteImageFromUrl(user.image);
 
         user.image = url;
 

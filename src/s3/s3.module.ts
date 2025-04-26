@@ -7,5 +7,6 @@ import { JwtModule } from "@nestjs/jwt";
     imports: [JwtModule],
     controllers: [UploadController],
     providers: [S3Service],
+    exports: [S3Service],
 })
 export class S3Module {}
