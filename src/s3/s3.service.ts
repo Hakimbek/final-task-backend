@@ -13,7 +13,10 @@ export class S3Service {
         }
     });
 
-    async getSignedUrl(fileName: string, fileType: string) {
+    async getSignedUrl(
+        fileName: string,
+        fileType: string
+    ): Promise<{ signedUrl: string, key: string }> {
         const key = `${uuid()}-${fileName}`;
 
         const command = new PutObjectCommand({

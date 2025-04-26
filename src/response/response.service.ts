@@ -25,7 +25,9 @@ export class ResponseService {
         private readonly templateService: TemplateService,
     ) {}
 
-    getResponseById = async (responseId: string) => {
+    getResponseById = async (
+        responseId: string
+    ): Promise<Response> => {
         const response = await this.responseRepository.findOne({ where: { id: responseId } });
 
         if (!response) throw new NotFoundException(`Response not found`);
@@ -33,7 +35,9 @@ export class ResponseService {
         return response;
     }
 
-    getResponsesByTemplateId = (templateId: string) => {
+    getResponsesByTemplateId = (
+        templateId: string
+    ): Promise<Response[]> => {
         return this.responseRepository.find({
             where: {
                 template: { id: templateId }
@@ -41,7 +45,9 @@ export class ResponseService {
         });
     }
 
-    getResponsesByUserId = (userId: string) => {
+    getResponsesByUserId = (
+        userId: string
+    ): Promise<Response[]> => {
         return this.responseRepository.find({
             where: {
                 user: { id: userId }
@@ -66,7 +72,7 @@ export class ResponseService {
         templateId: string,
         answers: { questionId: string; answer: string }[],
         authUserId: string
-    ) => {
+    ): Promise<{ message: string }> => {
         const user = await this.userService.findById(authUserId);
 
         if (userId !== user?.id) throw new ForbiddenException("Action is not allowed");
@@ -92,7 +98,7 @@ export class ResponseService {
     editResponseById = async (
         responseId: string,
         answers: { questionId: string; answer: string }[]
-    ) => {
+    ): Promise<{ message: string }> => {
         const response = await this.getResponseById(responseId);
 
         await Promise.all(answers.map(async ({ questionId, answer }) => {
@@ -102,7 +108,9 @@ export class ResponseService {
         return { message: "Response updated successfully" };
     }
 
-    deleteResponseById = async (responseId: string) => {
+    deleteResponseById = async (
+        responseId: string
+    ): Promise<{ message: string }> => {
         const result = await this.responseRepository.delete(responseId);
 
         if (result.affected === 0) throw new NotFoundException("Response not found or already deleted");
