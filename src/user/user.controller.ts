@@ -6,17 +6,12 @@ import {
     Param,
     Put,
     UseGuards,
-    Res,
-    HttpStatus,
-    Headers,
-    ForbiddenException,
     BadRequestException
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { UserGuard } from "./user.guard";
 import { UpdateUserDto, UpdateImageDto } from "./user.dto";
-import { Response } from "express";
 import { JwtService } from "@nestjs/jwt";
 import { AdminGuard } from "./admin.guard";
 

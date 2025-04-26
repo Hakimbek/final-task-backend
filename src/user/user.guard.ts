@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from "./user.service";
 
@@ -17,6 +17,6 @@ export class UserGuard implements CanActivate {
 
         if (user?.isAdmin || userId === user?.id) return true;
 
-        throw new ForbiddenException('You are not the owner of this user');
+        throw new ForbiddenException("You are not the owner of this user");
     }
 }
