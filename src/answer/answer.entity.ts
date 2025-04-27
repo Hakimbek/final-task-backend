@@ -13,7 +13,8 @@ export class Answer {
     response: Response;
 
     @ManyToOne(() => Question, question => question.answers, {
-        onDelete: "CASCADE"
+        onDelete: "CASCADE",
+        eager: true
     })
     question: Question;
 

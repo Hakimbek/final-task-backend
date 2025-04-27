@@ -2,8 +2,6 @@ import {
     ConflictException,
     Injectable,
     NotFoundException,
-    Inject,
-    forwardRef,
     BadRequestException,
     ForbiddenException
 } from "@nestjs/common";
@@ -12,7 +10,6 @@ import { Repository } from "typeorm";
 import { Response } from "./response.entity";
 import { AnswerService } from "../answer/answer.service";
 import { UserService } from "../user/user.service";
-import { TemplateService } from "../template/template.service";
 
 @Injectable()
 export class ResponseService {
@@ -20,9 +17,7 @@ export class ResponseService {
         @InjectRepository(Response)
         private readonly responseRepository: Repository<Response>,
         private readonly answerService: AnswerService,
-        private readonly userService: UserService,
-        @Inject(forwardRef(() => TemplateService))
-        private readonly templateService: TemplateService,
+        private readonly userService: UserService
     ) {}
 
     getResponseById = async (

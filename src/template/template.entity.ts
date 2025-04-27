@@ -30,7 +30,8 @@ export class Template {
     user: User;
 
     @OneToMany(() => Question, question => question.template, {
-        cascade: true
+        cascade: true,
+        eager: true,
     })
     questions: Question[];
 

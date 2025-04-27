@@ -22,7 +22,8 @@ export class Response {
     template: Template;
 
     @OneToMany(() => Answer, answer => answer.response, {
-        cascade: true
+        cascade: true,
+        eager: true
     })
     answers: Answer[];
 
