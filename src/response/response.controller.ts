@@ -12,11 +12,34 @@ export class ResponseController {
         private readonly jwtService: JwtService
     ) {}
 
+    @Get("response/:responseId")
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async getResponsesById(@Param("responseId") responseId: string) {
+        try {
+            return await this.responseService.getResponseById(responseId);
+        } catch (error) {
+            throw new BadRequestException(error.response);
+        }
+    }
+
     @Get("user/:userId")
     @UseGuards(JwtAuthGuard, ResponseGuard)
     async getResponsesByUserId(@Param("userId") userId: string) {
         try {
             return await this.responseService.getResponsesByUserId(userId);
+        } catch (error) {
+            throw new BadRequestException(error.response);
+        }
+    }
+
+    @Get("user/:userId/template/:templateId")
+    @UseGuards(JwtAuthGuard, ResponseGuard)
+    async getResponseByUserAndTemplateId(
+        @Param("userId") userId: string,
+        @Param("templateId") templateId: string
+    ) {
+        try {
+            return await this.responseService.getResponseByUserAndTemplateId(userId, templateId);
         } catch (error) {
             throw new BadRequestException(error.response);
         }
