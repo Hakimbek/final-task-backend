@@ -16,6 +16,9 @@ export class Question {
     @Column({ default: true })
     isVisible: boolean;
 
+    @Column("text", { default: [], array: true })
+    options: string[];
+
     @Column({ nullable: false })
     type: string;
 

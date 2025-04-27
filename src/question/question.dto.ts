@@ -13,6 +13,9 @@ export class QuestionDto {
     @IsNotEmpty({ message: "type is required" })
     type: string;
 
+    @IsArray()
+    options: string[] = [];
+
     @IsNotEmpty({ message: "templateId is required" })
     templateId: string;
 }
@@ -29,6 +32,9 @@ export class EditQuestionDto {
 
     @IsNotEmpty({ message: "type is required" })
     type: string;
+
+    @IsArray()
+    options: string[] = [];
 }
 
 export class ReorderDto {

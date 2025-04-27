@@ -14,7 +14,7 @@ import * as process from "node:process";
       database: process.env.DB_NAME,
       ssl: true,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
   ],
   exports: [TypeOrmModule],

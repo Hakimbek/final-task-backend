@@ -24,7 +24,7 @@ export class QuestionController {
     @Post()
     @UseGuards(JwtAuthGuard, QuestionGuard)
     async createQuestion(
-        @Body() { title, description, type, isVisible, templateId }: QuestionDto,
+        @Body() { title, description, type, isVisible, templateId, options }: QuestionDto,
     ) {
         try {
             return await this.questionService.createQuestion(
@@ -32,7 +32,8 @@ export class QuestionController {
                 description,
                 isVisible,
                 type,
-                templateId
+                templateId,
+                options
             );
         } catch (error) {
             throw new BadRequestException(error.response);
@@ -53,7 +54,7 @@ export class QuestionController {
     @UseGuards(JwtAuthGuard, QuestionGuard)
     async editQuestionById(
         @Param("questionId") questionId: string,
-        @Body() { title, description, type, isVisible }: EditQuestionDto
+        @Body() { title, description, type, isVisible, options }: EditQuestionDto
     ) {
         try {
             return await this.questionService.editQuestionById(
@@ -61,7 +62,8 @@ export class QuestionController {
                 title,
                 description,
                 isVisible,
-                type
+                type,
+                options
             );
         } catch (error) {
             throw new BadRequestException(error.response);

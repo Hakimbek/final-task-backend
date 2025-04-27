@@ -29,6 +29,7 @@ export class QuestionService {
         isVisible: boolean,
         type: string,
         templateId: string,
+        options: string[],
     ): Promise<Question> => {
         const questions = await this.questionRepository.find({
             where: {
@@ -41,6 +42,7 @@ export class QuestionService {
             description,
             isVisible,
             type,
+            options,
             order: questions.length + 1,
             template: {
                 id: templateId,
@@ -56,6 +58,7 @@ export class QuestionService {
         description: string,
         isVisible: boolean,
         type: string,
+        options: string[],
     ): Promise<{ message: string }> => {
         const question = await this.getQuestionById(questionId);
 
@@ -63,6 +66,7 @@ export class QuestionService {
         question.description = description;
         question.type = type;
         question.isVisible = isVisible;
+        question.options = options;
 
         await this.questionRepository.save(question);
 
