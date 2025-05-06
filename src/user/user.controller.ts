@@ -12,14 +12,12 @@ import { UserService } from "./user.service";
 import { JwtAuthGuard } from "../jwt/jwt-auth.guard";
 import { UserGuard } from "./user.guard";
 import { UpdateUserDto, UpdateImageDto } from "./user.dto";
-import { JwtService } from "@nestjs/jwt";
 import { AdminGuard } from "./admin.guard";
 
 @Controller("user")
 export class UserController {
     constructor(
-        private readonly userService: UserService,
-        private readonly jwtService: JwtService,
+        private readonly userService: UserService
     ) {}
 
     @Get()

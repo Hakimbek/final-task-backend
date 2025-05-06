@@ -53,7 +53,10 @@ export class UserService {
         id: string
     ): Promise<{ message: string }> => {
         const user = await this.findById(id);
-        await this.s3Service.deleteImageFromUrl(user.image);
+
+        if (user?.image) {
+            await this.s3Service.deleteImageFromUrl(user.image);
+        }
 
         user.image = url;
 
